@@ -1,0 +1,399 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+	</head>
+	<body>
+		<canvas id="canvas"></canvas>
+		<div id="menu">
+		</div>
+		<div class="submenu">
+			<button class="submenu_button" id="func1">Add Tshirt</button>
+			<button class="submenu_button" id="func2">Add Pocket</button>
+			<button class="submenu_button" id="func3">Delete Tshirt</button>
+		</div>
+		<script>
+			class SyntAx {
+	constructor(cnv) {
+		// Служебные поля
+		cnv.SyntAxThis = this;
+		this.canvas = cnv;
+		this.canvas.width = 400;
+		this.canvas.height = 700;
+		this.ctx = this.canvas.getContext("2d");
+		// Массив отображаемых объектов
+		this.elems = [];
+		// Настройка событий canvas
+		this.canvas.onmousemove = this.SyntAxEventMousemove;
+		this.canvas.onmousedown = this.SyntAxEventMousedown;
+		this.canvas.onmouseup = this.SyntAxEventMouseup;
+		this.canvas.onclick = this.SyntAxEventClick;
+		this.focusElement = undefined;
+	}
+	SyntAxRewrite() {
+		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		for (let i = this.elems.length - 1; i >= 0; --i)
+		{
+			this.ctx.strokeRect(this.elems[i].startPointX, this.elems[i].startPointY, 
+				this.elems[i].width, this.elems[i].heigth);
+			this.elems[i].onwrite(this.ctx);
+		}
+		if (this.focusElement)
+		{
+			this.ctx.strokeStyle = "grey";
+			this.ctx.beginPath();
+			this.ctx.moveTo(this.focusElement.startPointX, 0);
+			this.ctx.lineTo(this.focusElement.startPointX, this.canvas.height);
+			this.ctx.moveTo(this.focusElement.startPointX + this.focusElement.width, this.canvas.height);
+			this.ctx.lineTo(this.focusElement.startPointX + this.focusElement.width, 0);
+			this.ctx.moveTo(0, this.focusElement.startPointY);
+			this.ctx.lineTo(this.canvas.width, this.focusElement.startPointY);
+			this.ctx.moveTo(this.canvas.width, this.focusElement.startPointY + this.focusElement.height);
+			this.ctx.lineTo(0, this.focusElement.startPointY + this.focusElement.height);
+			this.ctx.stroke();
+			this.ctx.strokeStyle = "black";
+		}
+	}
+	SyntAxSortFunction(a, b) {
+		if (a.zIndex > b.zIndex) return -1;
+		if (a.zIndex < b.zIndex) return 1;
+		return 0;
+	}
+	SyntAxAddElement(element) {
+		this.elems[this.elems.length] = element;
+		this.elems.sort(this.SyntAxSortFunction);
+		this.SyntAxRewrite();
+		return element;
+	}
+	SyntAxDeleteElementId(id) {
+		for (let i = 0; i < elems.length; ++i)
+		{
+			if (this.elems[i].id == id)
+			{
+				for (; i < (this.elems.length - 1); ++i)
+				{
+					let t = this.elems[i];
+					this.elems[i] = this.elems[i + 1];
+					this.elems[i + 1] = t;
+				}
+				this.elems.pop();
+				break;
+			}
+		}
+	}
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
+	SyntAxEventClick(event) {
+		let parent = this.SyntAxThis;
+		for (let i = 0; i < parent.elems.length; ++i)
+		{
+			if (event.clientY > parent.elems[i].startPointY && 
+				event.clientY < parent.elems[i].startPointY + parent.elems[i].height && 
+				event.clientX > parent.elems[i].startPointX && 
+				event.clientX < parent.elems[i].startPointX + parent.elems[i].width)
+			{
+				parent.elems[i].onclick(event);
+				return;
+			}
+		}
+		// Нажатие на чистый лист
+		parent.focusElement = undefined;
+		parent.SyntAxRewrite();
+		////
+	}
+	SyntAxEventMousedown(event) {
+		let parent = this.SyntAxThis;
+		for (let i = 0; i < parent.elems.length; ++i)
+		{
+			if (event.clientY > parent.elems[i].startPointY && 
+				event.clientY < parent.elems[i].startPointY + parent.elems[i].height && 
+				event.clientX > parent.elems[i].startPointX && 
+				event.clientX < parent.elems[i].startPointX + parent.elems[i].width)
+			{
+				parent.elems[i].onmousedown(event);
+				return;
+			}
+		}
+	}
+	SyntAxEventMouseup(event) {
+		let parent = this.SyntAxThis;
+
+		if (parent.focusElement &&
+			event.clientY > parent.focusElement.startPointY && 
+			event.clientY < parent.focusElement.startPointY + parent.focusElement.height && 
+			event.clientX > parent.focusElement.startPointX && 
+			event.clientX < parent.focusElement.startPointX + parent.focusElement.width)
+		{
+			parent.focusElement.onmouseup(event);
+			return;
+		}
+
+		for (let i = 0; i < parent.elems.length; ++i)
+		{
+			if (event.clientY > parent.elems[i].startPointY && 
+				event.clientY < parent.elems[i].startPointY + parent.elems[i].height && 
+				event.clientX > parent.elems[i].startPointX && 
+				event.clientX < parent.elems[i].startPointX + parent.elems[i].width)
+			{
+				parent.elems[i].onmouseup(event);
+				return;
+			}
+		}
+	}
+	SyntAxEventMousemove(event) {
+		let parent = this.SyntAxThis;
+
+		if (parent.focusElement &&
+			event.clientY > parent.focusElement.startPointY && 
+			event.clientY < parent.focusElement.startPointY + parent.focusElement.height && 
+			event.clientX > parent.focusElement.startPointX && 
+			event.clientX < parent.focusElement.startPointX + parent.focusElement.width)
+		{
+			parent.focusElement.onmousemove(event);
+			return;
+		}
+
+		for (let i = 0; i < parent.elems.length; ++i)
+		{
+			if (event.clientY > parent.elems[i].startPointY && 
+				event.clientY < parent.elems[i].startPointY + parent.elems[i].height && 
+				event.clientX > parent.elems[i].startPointX && 
+				event.clientX < parent.elems[i].startPointX + parent.elems[i].width)
+			{
+				parent.elems[i].onmousemove(event);
+				return;
+			}
+		}
+	}
+}
+///////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+class ELEMENT {
+	constructor() {
+		// SyntAx attributes
+		this.onclick = undefined;
+		this.onmousedown = undefined;
+		this.onmouseup = undefined;
+		this.onmousemove = undefined;
+		this.onwrite = undefined;
+		this.id = undefined;
+		this.zIndex = undefined;
+		// Middle attributes
+		this.width = undefined;
+		this.height = undefined;
+		this.startPointX = undefined;
+		this.startPointY = undefined;
+		// Menu attributes
+		this.color = undefined;
+	}
+}
+///////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////// TYPES /////////////////////////////////////
+
+let part = ["body", "sleeve"];
+let color = ["yellow", "green", "blue", "orange"];
+
+
+clickB = function() {
+	if (funcList.curPart)
+		funcList.curPart.color = this.innerHTML;
+	FraMe.SyntAxRewrite();
+}
+
+class MeNu {
+	constructor(div) {
+		this.div = div;
+		// Передается высота для изменения высоты кнопок
+
+		// Переменные
+		this.buttonCollection = undefined;
+		this.curViewMassive = undefined;
+		this.curList = undefined;
+		// Trace
+		this.curPart = undefined;
+		this.cur
+	}
+	MeNuAddButton(count) {
+		for (let i = 0; i < count; ++i)
+		{
+			let t = this.div.appendChild(document.createElement("button"));
+			t.className = "menu_button";
+		}
+	}
+	MeNuSetButtonCollection() {
+		this.buttonCollection = document.getElementsByClassName("menu_button");
+	}
+	MeNuActivateButton() {
+		for (let i = 0; i < this.buttonCollection.length; ++i)
+		{
+			this.buttonCollection[i].onclick = clickB;
+		}
+	}
+	MeNuViewFunc() {
+		for (let i = 0; i < this.buttonCollection.length && i < this.curViewMassive.length; ++i)
+		{
+			this.buttonCollection[i].innerHTML = this.curViewMassive[i];
+		}
+	}
+	MeNuSetCurList(num) {
+		this.curList = num;
+		switch (num)
+		{
+			case 0:
+			this.curViewMassive = part;
+			break;
+			case 1:
+			this.curViewMassive = color;
+			break;
+		}
+		this.MeNuViewFunc();
+	}
+
+}
+let FraMe = new SyntAx(canvas);
+let funcList = new MeNu(menu);
+funcList.MeNuAddButton(5);
+funcList.MeNuSetButtonCollection();
+funcList.MeNuSetCurList(1);
+funcList.MeNuActivateButton();
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+ColorRef = function(ctx) {
+	ctx.fillStyle = this.color;
+	ctx.fillRect(this.startPointX, this.startPointY, this.width, this.height);
+	ctx.fillStyle = "black";
+}
+
+move = function(event) {
+	this.startPointX = event.clientX - this.width/2;
+	this.startPointY = event.clientY - this.height/2;
+	FraMe.SyntAxRewrite();
+}
+
+up = function(event) {
+	this.onmousemove = undefined;
+	FraMe.focusElement = undefined;
+	funcList.curPart = undefined;
+	FraMe.SyntAxRewrite();
+}
+
+down = function(event) {
+	this.onmousemove = move;
+	FraMe.focusElement = this;
+}
+
+click = function() {
+	FraMe.focusElement = this;
+	funcList.curPart = this;
+	FraMe.SyntAxRewrite();
+}
+
+
+
+func1.onclick = function() {
+	if (FraMe.elems[0])
+	{
+		while (FraMe.elems.length)
+			FraMe.elems.pop();
+	}
+	let body = new ELEMENT;
+	body.width = 130;
+	body.height = 250;
+	body.startPointX = (canvas.width - body.width)/2;
+	body.startPointY = (canvas.height - body.height)/2;
+	body.color = "lightgreen";
+	body.onwrite = ColorRef;
+	let left_sleeve = new ELEMENT;
+	left_sleeve.width = 40;
+	left_sleeve.height = 70;
+	left_sleeve.startPointX = body.startPointX - left_sleeve.width;
+	left_sleeve.startPointY = (canvas.height - body.height)/2;
+	left_sleeve.color = "blue";
+	left_sleeve.onwrite = ColorRef;
+	let right_sleeve = new ELEMENT;
+	right_sleeve.width = 40;
+	right_sleeve.height = 70;
+	right_sleeve.startPointX = body.startPointX + body.width;
+	right_sleeve.startPointY = (canvas.height - body.height)/2;
+	right_sleeve.color = "blue";
+	right_sleeve.onwrite = ColorRef;
+	right_sleeve.zIndex = 0;
+	left_sleeve.zIndex = 0;
+	body.zIndex = 0;
+	body.onclick = click;
+	left_sleeve.onclick = click;
+	right_sleeve.onclick = click;
+	FraMe.SyntAxAddElement(body);
+	FraMe.SyntAxAddElement(left_sleeve);
+	FraMe.SyntAxAddElement(right_sleeve);
+}
+
+func2.onclick = function() {
+	let elm = new ELEMENT;
+	elm.startPointX = 0;
+	elm.startPointY = 0;
+	elm.width = 30;
+	elm.height = 35;
+	elm.onmousedown = down;
+	elm.onmouseup = up;
+	elm.color = "brown";
+	elm.onwrite = ColorRef;
+	elm.zIndex = 1;
+	FraMe.SyntAxAddElement(elm);
+}
+
+func3.onclick = function() {
+	if (FraMe.elems[0])
+	{
+		while (FraMe.elems.length)
+			FraMe.elems.pop();
+	}
+	FraMe.SyntAxRewrite();
+}
+		</script>
+		<style>
+			#canvas {
+				width: 400px;
+				height: 700px;
+				border: 1px solid black;
+				float: left;
+			}
+			body {
+				margin: 0;
+				padding: 0;
+			}
+			#menu {
+				width: 200px;
+				height: 700px;
+				border: 1px solid green;
+				margin-left: 1px;
+				float: left;
+			}
+			.menu_button {
+				width: 100%;
+				padding: 0;
+				margin: 0;
+				border: 1px solid black;
+				border-radius: 3px;
+				background-color: lightgreen;
+				height: 100px;
+			}
+			.submenu {
+				height: 50px;
+				width: 800px;
+				border: 1px solid grey;
+				float: left;
+			}
+			.submenu_button {
+				height: 100%;
+				width: 33.333%;
+				background-color: orange;
+				display: block;
+				float: left;
+			}
+		</style>
+	</body>
+</html>
